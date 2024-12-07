@@ -1,0 +1,44 @@
+package com.klef.jfsd.exam;
+
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
+import org.hibernate.cfg.Configuration;
+
+public class ClientDemo {
+    public static void main(String[] args) {
+        // Load configuration and build session factory
+        Configuration configuration = new Configuration().configure();
+        SessionFactory sessionFactory = configuration.buildSessionFactory();
+
+        // Open session and begin transaction
+        Session session = sessionFactory.openSession();
+        Transaction transaction = session.beginTransaction();
+
+        try {
+            // Update operation using HQL with positional parameters
+            int departmentId = 1;
+            String newName = "Updated Name";
+            String newLocation = "Updated Location";
+
+            String hql = "UPDATE Department SET name = ?1, location = ?2 WHERE departmentId = ?3";
+            int rowsAffected = session.createQuery(hql)
+                                      .setParameter(1, newName)
+                                      .setParameter(2, newLocation)
+                                      .setParameter(3, departmentId)
+                                      .executeUpdate();
+
+            transaction.commit();
+            System.out.println(rowsAffected + " rows updated successfully.");
+
+        } catch (Exception e) {
+            if (transaction != null) {
+                transaction.rollback();
+            }
+            e.printStackTrace();
+        } finally {
+            session.close();
+            sessionFactory.close();
+        }
+    }
+}
